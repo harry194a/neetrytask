@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+  neetry-iam-db:
+    image: mysql:8
+    container_name: neetry-iam-db
+    restart:  always
+    networks:
+      - neetry-iam
+    environment:
+      - MYSQL_DATABASE=iam
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 3309:3306
+  neetry-iam-app:
+    image: neetry-iam
+    container_name: neetry-iam-app
+    depends_on:
+      - neetry-iam-db
+    restart: always
+    ports:
+      - 8081:8081
+    networks:
+      - neetry-iam
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms512m
+      - SPRING_DATASOURCE_URL=jdbc:mysql://neetry-iam-db:3306/iam
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_FLYWAY_USER=root
+      - SPRING_FLYWAY_PASSWORD=password
+      - SPRING_FLYWAY_SCHEMAS=iam
+      - SPRING_JPA_DATABASEPLATFORM=org.hibernate.dialect.MySQL8Dialect
+    command: --logging.level.root=DEBUG
+networks:
+  neetry-iam:
+    name: neetry-iam
+volumes:
+  neetry-iam:
+    name: neetry-iam
